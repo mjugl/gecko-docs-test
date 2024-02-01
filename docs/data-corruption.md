@@ -194,13 +194,66 @@ print(missing_corruptor(srs))
 
 ### Edit errors
 
-#### Insertion
+Edit errors are caused by a set of operations on single characters within a word.
+There are commonly four operations that can induce these types of errors: insertion and deletion of a single character, substitution of a character with a different one, and transposition of two adjacent characters.
 
-#### Deletion
+Gecko provides corruptors for each of these operations. 
+For insertions and substitutions, it is possible to define a set of characters to choose from.
 
-#### Substitution
+```python
+import string
 
-#### Transposition
+import numpy as np
+import pandas as pd
+
+from gecko import corruptor
+
+rng = np.random.default_rng(8080)
+srs = pd.Series(["apple", "banana", "clementine"])
+    
+insert_corruptor = corruptor.with_insert(charset=string.ascii_letters, rng=rng)
+print(insert_corruptor(srs))
+# => ["axpple", "banapna", "clementtine"]
+
+delete_corruptor = corruptor.with_delete(rng=rng)
+print(delete_corruptor(srs))
+# => ["aple", "bnana", "clementin"]
+
+substitute_corruptor = corruptor.with_substitute(charset=string.digits, rng=rng)
+print(substitute_corruptor(srs))
+# => ["appl9", "ba4ana", "clementi9e"]
+
+transpose_corruptor = corruptor.with_transpose(rng)
+print(transpose_corruptor(srs))
+# => ["paple", "baanna", "clemenitne"]
+```
+
+Gecko also provides a more general edit corruptor which wraps around the insertion, deletion, substitution and transposition corruptor.
+It is then possible to assign probabilities for each operation.
+By default, all operations are equally likely to be performed.
+
+```python
+import numpy as np
+import pandas as pd
+
+from gecko import corruptor
+
+rng = np.random.default_rng(8443)
+srs = pd.Series(["apple", "banana", "clementine", "durian", "eggplant", "fig", "grape", "honeydew"])
+
+edit_corruptor_1 = corruptor.with_edit(rng=rng)
+# => ["aple", "banan", "clementinb", "duiran", "eAgplant", "Nig", "grapce", "hoKeydew"]
+
+edit_corruptor_2 = corruptor.with_edit(
+    p_insert=0.1,
+    p_delete=0.2,
+    p_substitute=0.3,
+    p_transpose=0.4,
+    rng=rng,
+)
+print(edit_corruptor_2(srs))
+# => ["aplpe", "anana", "lementine", "duriRan", "geggplant", "fg", "rgape", "honedyew"]
+```
 
 ### Categorical errors
 
