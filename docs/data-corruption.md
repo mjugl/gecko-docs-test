@@ -114,7 +114,7 @@ The signature is similar to that of `with_replacement_table`.
 import numpy as np
 import pandas as pd
 
-from geco import corruptor
+from gecko import corruptor
 
 rng = np.random.default_rng(8844167)
 

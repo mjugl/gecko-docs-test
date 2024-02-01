@@ -231,7 +231,7 @@ The following example utilizes most of the generators shown in this guide.
 ```py
 import numpy as np
 
-from geco import generator
+from gecko import generator
 
 rng = np.random.default_rng(222)
 
