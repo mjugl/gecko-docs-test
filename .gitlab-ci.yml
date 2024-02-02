@@ -1,0 +1,16 @@
+image: python:3.11
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+pages:
+  script:
+    - python -m pip install poetry
+    - poetry install
+    - poetry run mkdocs build -d public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
