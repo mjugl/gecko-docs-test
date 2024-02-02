@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
-site_name: Gecko
+site_name: Gecko Docs
 plugins:
   - search
 theme:
@@ -8,6 +8,7 @@ theme:
     - content.code.copy
     - search.highlight
     - search.share
+    - navigation.footer
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -22,6 +23,9 @@ theme:
 
 markdown_extensions:
   - admonition
+  - attr_list
+  - footnotes
+  - md_in_html
   - pymdownx.details
   - pymdownx.keys
   - pymdownx.highlight:
@@ -35,5 +39,15 @@ markdown_extensions:
       alternate_style: true
 
 nav:
+  - Intro to Gecko: index.md
   - Generating data: data-generation.md
   - Corrupting data: data-corruption.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/gitlab
+      link: https://gitlab.com/ul-mds/record-linkage/gecko/gecko/
+    - icon: fontawesome/solid/globe
+      link: https://www.uniklinikum-leipzig.de/einrichtungen/medical-data-science/en
+    - icon: fontawesome/solid/envelope
+      link: mailto:Maximilian.Jugl@medizin.uni-leipzig.de
