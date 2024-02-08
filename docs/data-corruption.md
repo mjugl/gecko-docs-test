@@ -257,7 +257,118 @@ print(edit_corruptor_2(srs))
 
 ### Categorical errors
 
+Sometimes an attribute can only take on a set number of values.
+For example, if you have a "gender" column in your dataset and it can only take on `m` for male, `f` for female and `o` for other, it wouldn't make sense for a corrupted record to contain anything else except these three options.
+
+Gecko offers the `with_categorical_values` function for this purpose.
+It sources all possible options from a column in CSV file and then applies random replacements respecting the limited available options.
+
+```python
+import numpy as np
+import pandas as pd
+
+from gecko import corruptor
+
+rng = np.random.default_rng(22)
+srs = pd.Series(["f", "m", "f", "f", "o", "m", "o", "o"])
+
+categorical_corruptor = corruptor.with_categorical_values(
+    "./gender.csv",  # CSV file containing "gender" column with "f", "m" and "o" as possible values
+    header=True,
+    value_column="gender",
+    rng=rng,
+)
+
+print(categorical_corruptor(srs))
+# => ["o", "f", "m", "o", "f", "o", "f", "m"]
+```
+
 ### Common replacements
+
+Other various error sources, such as optical character recognition (OCR) errors, can be modeled using simple replacement tables.
+These tables have a source and a target column, defining mappings between character sequences.
+
+The `with_replacement_table` function achieves just that.
+Suppose you have the following CSV file with common OCR errors.
+
+```csv
+k,lc
+5,s
+2,z
+1,|
+```
+
+You can use this file the same way you can with many other generation and corruption functions in Gecko.
+
+```python
+import numpy as np
+import pandas as pd
+
+from gecko import corruptor
+
+rng = np.random.default_rng(6379)
+srs = pd.Series(["kick 0", "step 1", "go 2", "run 5"])
+
+replacement_corruptor = corruptor.with_replacement_table(
+    "./ocr.csv",
+    rng=rng,
+)
+
+print(replacement_corruptor(srs))
+# => ["lcick 0", "step |", "go z", "run s"]
+```
 
 ## Multiple corruptors
 
+Using `corrupt_dataframe`, you can apply multiple corruptors on many columns at once.
+It is possible to set probabilities for each corruptor, as well as to define multiple corruptors per column.
+
+```python
+import string
+
+import numpy as np
+import pandas as pd
+
+from gecko import corruptor
+
+df = pd.DataFrame(
+    {
+        "fruit": ["apple", "banana", "orange"],
+        "type": ["elstar", "cavendish", "mandarin"],
+        "weight_in_grams": ["241.0", "195.6", "71.1"],
+        "amount": ["3", "5", "6"],
+        "grade": ["B", "C", "B"],
+    }
+)
+
+rng = np.random.default_rng(25565)
+
+df_corrupt = corruptor.corrupt_dataframe(df, {
+    "fruit": [ # (1)!
+        (.75, corruptor.with_cldr_keymap_file("de-t-k0-windows.xml", rng=rng,))
+    ],
+    "type": [ # (2)!
+        corruptor.with_edit(
+            p_insert=.4, 
+            p_delete=.3, 
+            p_substitute=.2, 
+            p_transpose=.1, 
+            charset=string.ascii_lowercase,
+        )
+    ],
+    "grade": [ # (3)!
+        corruptor.with_missing_value(strategy="all"),
+        corruptor.with_substitute(charset=string.ascii_uppercase, rng=rng),
+    ]
+})
+
+print(df_corrupt)
+# => [["fruit", "type", "weight_in_grams", "amount", "grade"],
+#       ["apole", "lstar", "241.0", "3", ""],
+#       ["bananq", "cavendiash", "195.6", "5", ""],
+#       ["oeange", "mandarni", "71.1", "6", "M"]]
+```
+
+1. You can assign probabilities to corruptors for a column. In this case, the keymap corruptor will apply to 75% of all records. The remaining 25% remain untouched.
+2. You can assign a single corruptor to a column. In this case, the edit corruptor will apply to all records.
+3. You can assign multiple corruptors to a column. In this case, the missing value and substitute corruptors will apply to 50% of records each.
