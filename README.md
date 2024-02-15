@@ -1,5 +1,5 @@
 This repository contains all documentation for Gecko.
-It is based on [Material for Mkdoocs](https://squidfunk.github.io/mkdocs-material/).
+It is based on [Material for Mkdocs](https://squidfunk.github.io/mkdocs-material/).
 
 # Usage
 
