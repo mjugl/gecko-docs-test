@@ -266,19 +266,19 @@ grade_generator = generator.from_function(
 )
 
 df = generator.to_dataframe(
-    [
-        (fruit_generator, ["fruit", "type"]),
-        (weight_generator, "weight_in_grams"),
-        (amount_generator, "amount"),
-        (grade_generator, "grade"),
-    ],
+    {
+        ("fruit", "type"): fruit_generator,
+        "weight_in_grams": weight_generator,
+        "amount": amount_generator,
+        "grade": grade_generator,
+    },
     1000,
 )
 
 print(df)
 # => [["fruit", "type", "weight_in_grams", "amount", "grade"],
-#       ["apple", "elstar", "195.8", "2", "B"],
-#       ["orange", "clementine", "204.5", "5", "B"],
+#       ["apple", "elstar", "162.5", "8", "C"],
+#       ["orange", "clementine", "186.8", "5", "A"],
 #       ...,
 #       ["apple", "elstar", "78.7", "4", "B"]]
 ```
