@@ -397,14 +397,11 @@ def generate_data_frame(count, rng):
         rng=rng,
     )
 
-    return generator.to_dataframe(  
-        [
-            (gen_given_name_gender, ["given_name", "gender"]),  
-            (gen_last_name, "last_name"),
-            (gen_street_municip_postcode, ["street_name", "municipality", "postcode"]),
-        ],
-        count
-    )
+    return generator.to_dataframe({
+        ("given_name", "gender"): gen_given_name_gender,
+        "last_name": gen_last_name,
+        ("street_name", "municipality", "postcode"): gen_street_municip_postcode,
+    }, count)
 
 
 def corrupt_data_frame(df, rng):
@@ -617,15 +614,12 @@ def generate_data_frame(count, rng):
     
     gen_date_of_birth = create_date_of_birth_generator(rng=rng)  # (1)!
 
-    return generator.to_dataframe( 
-        [
-            (gen_given_name_gender, ["given_name", "gender"]),
-            (gen_last_name, "last_name"), 
-            (gen_street_municip_postcode, ["street_name", "municipality", "postcode"]),
-            (gen_date_of_birth, "date_of_birth"), # (2)!
-        ],
-        count
-    )
+    returngenerator.to_dataframe({
+        ("given_name", "gender"): gen_given_name_gender,
+        "last_name": gen_last_name,
+        ("street_name", "municipality", "postcode"): gen_street_municip_postcode,
+        "date_of_birth": gen_date_of_birth,
+    }, count)
 ```
 
 1. Now you have a reusable generator with a configurable start and end date. As long as a function returns a generator, it can be seamlessly used with Gecko.
