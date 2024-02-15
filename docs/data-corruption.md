@@ -1,13 +1,14 @@
 # Corrupting data
 
 Gecko comes with a lot of built-in functions that corrupt data by applying errors that one might find in the real world.
-Any function that takes in and returns a [Pandas series](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html) is considered a corruptor function in Gecko.
+Any function that takes in and returns a list of [Pandas series](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html) is considered a corruptor function in Gecko.
 
 ```py
 import pandas as pd
 
-def corruptor_func(srs: pd.Series) -> pd.Series:
-    srs_out = srs.copy()
+def corruptor_func(srs_lst: list[pd.Series]) -> list[pd.Series]:
+    assert len(srs_lst) == 1  # check amount of columns
+    srs_out = srs_lst[0].copy()
     # ... perform mutations on the copy ...
     return srs_out
 ```
@@ -48,8 +49,8 @@ kb_corruptor = corruptor.with_cldr_keymap_file(
     rng=rng
 )
 srs = pd.Series(["apple", "banana", "clementine"])
-print(kb_corruptor(srs))
-# => ["spple", "banany", "cldmentine"]
+print(kb_corruptor([srs]))
+# => [["spple", "banany", "cldmentine"]]
 ```
 
 By default, this corruptor considers all possible neighboring keys for each key.
@@ -71,8 +72,8 @@ kb_corruptor = corruptor.with_cldr_keymap_file(
     rng=rng
 )
 srs = pd.Series(["123-456-789", "727-727-727", "294-753-618"])
-print(kb_corruptor(srs))
-# => ["122-456-789", "827-727-727", "294-753-628"]
+print(kb_corruptor([srs]))
+# => [["122-456-789", "827-727-727", "294-753-628"]]
 ```
 
 ### Phonetic errors
@@ -128,8 +129,8 @@ phonetic_corruptor = corruptor.with_phonetic_replacement_table(
 )
 
 srs = pd.Series(["straße", "stadt", "schießen"])
-print(phonetic_corruptor(srs))
-# => ["strasse", "statt", "schiessen"]
+print(phonetic_corruptor([srs]))
+# => [["strasse", "statt", "schiessen"]]
 ```
 
 ### Missing values
@@ -155,8 +156,8 @@ missing_corruptor = corruptor.with_missing_value(
     strategy="empty"
 )
 srs = pd.Series(["apple", "   ", ""])
-print(missing_corruptor(srs))
-# => ["apple", "   ", "###_MISSING_###"]
+print(missing_corruptor([srs]))
+# => [["apple", "   ", "###_MISSING_###"]]
 ```
 
 Gecko considers strings to be "blank" when their length is zero after trimming all leading and trailing whitespaces.
@@ -172,8 +173,8 @@ missing_corruptor = corruptor.with_missing_value(
     strategy="blank"
 )
 srs = pd.Series(["apple", "   ", ""])
-print(missing_corruptor(srs))
-# => ["apple", "###_MISSING_###", "###_MISSING_###"]
+print(missing_corruptor([srs]))
+# => [["apple", "###_MISSING_###", "###_MISSING_###"]]
 ```
 
 The "nuclear" option is to replace all strings within a series with the "missing value".
@@ -188,8 +189,8 @@ missing_corruptor = corruptor.with_missing_value(
     strategy="all"
 )
 srs = pd.Series(["apple", "   ", ""])
-print(missing_corruptor(srs))
-# => ["###_MISSING_###", "###_MISSING_###", "###_MISSING_###"]
+print(missing_corruptor([srs]))
+# => [["###_MISSING_###", "###_MISSING_###", "###_MISSING_###"]]
 ```
 
 ### Edit errors
@@ -212,20 +213,20 @@ rng = np.random.default_rng(8080)
 srs = pd.Series(["apple", "banana", "clementine"])
     
 insert_corruptor = corruptor.with_insert(charset=string.ascii_letters, rng=rng)
-print(insert_corruptor(srs))
-# => ["axpple", "banapna", "clementtine"]
+print(insert_corruptor([srs]))
+# => [["aVpple", "banaFna", "clemenMtine"]]
 
 delete_corruptor = corruptor.with_delete(rng=rng)
-print(delete_corruptor(srs))
-# => ["aple", "bnana", "clementin"]
+print(delete_corruptor([srs]))
+# => [["aple", "bnana", "clementin"]]
 
 substitute_corruptor = corruptor.with_substitute(charset=string.digits, rng=rng)
-print(substitute_corruptor(srs))
-# => ["appl9", "ba4ana", "clementi9e"]
+print(substitute_corruptor([srs]))
+# => [["appl9", "ba4ana", "clementi9e"]]
 
 transpose_corruptor = corruptor.with_transpose(rng)
-print(transpose_corruptor(srs))
-# => ["paple", "baanna", "clemenitne"]
+print(transpose_corruptor([srs]))
+# => [["paple", "baanna", "clemenitne"]]
 ```
 
 Gecko also provides a more general edit corruptor which wraps around the insertion, deletion, substitution and transposition corruptor.
@@ -242,7 +243,8 @@ rng = np.random.default_rng(8443)
 srs = pd.Series(["apple", "banana", "clementine", "durian", "eggplant", "fig", "grape", "honeydew"])
 
 edit_corruptor_1 = corruptor.with_edit(rng=rng)
-# => ["aple", "banan", "clementinb", "duiran", "eAgplant", "Nig", "grapce", "hoKeydew"]
+print(edit_corruptor_1([srs]))
+# => [["aple", "banan", "clementinb", "duiran", "eAgplant", "Nig", "grapce", "hoKeydew"]]
 
 edit_corruptor_2 = corruptor.with_edit(
     p_insert=0.1,
@@ -251,8 +253,8 @@ edit_corruptor_2 = corruptor.with_edit(
     p_transpose=0.4,
     rng=rng,
 )
-print(edit_corruptor_2(srs))
-# => ["aplpe", "anana", "lementine", "duriRan", "geggplant", "fg", "rgape", "honedyew"]
+print(edit_corruptor_2([srs]))
+# => [["aplpe", "anana", "lementine", "duriRan", "geggplant", "fg", "rgape", "honedyew"]]
 ```
 
 ### Categorical errors
@@ -279,8 +281,29 @@ categorical_corruptor = corruptor.with_categorical_values(
     rng=rng,
 )
 
-print(categorical_corruptor(srs))
-# => ["o", "f", "m", "o", "f", "o", "f", "m"]
+print(categorical_corruptor([srs]))
+# => [["o", "f", "m", "o", "f", "o", "f", "m"]]
+```
+
+### Value permutations
+
+Certain types of information are easily confused with others.
+This is particularly true for names, where the differentiation between given and last names in a non-native language is challenging to get right.
+The `with_permute` function handles this exact use case.
+It simply swaps the values of two series that are passed into it.
+
+```python
+import pandas as pd
+
+from gecko import corruptor
+
+srs_given_name = pd.Series(["Max", "Jane", "Jan"])
+srs_last_name = pd.Series(["Mustermann", "Doe", "Jansen"])
+
+permute_corruptor = corruptor.with_permute()
+print(permute_corruptor([srs_given_name, srs_last_name]))
+# => [["Mustermann", "Doe", "Jansen"],
+#       ["Max", "Jane", "Jan"]]
 ```
 
 ### Common replacements
@@ -314,7 +337,7 @@ replacement_corruptor = corruptor.with_replacement_table(
     rng=rng,
 )
 
-print(replacement_corruptor(srs))
+print(replacement_corruptor([srs]))
 # => ["lcick 0", "step |", "go z", "run s"]
 ```
 
@@ -330,6 +353,7 @@ import numpy as np
 import pandas as pd
 
 from gecko import corruptor
+from gecko.corruptor import with_permute
 
 df = pd.DataFrame(
     {
@@ -344,31 +368,24 @@ df = pd.DataFrame(
 rng = np.random.default_rng(25565)
 
 df_corrupt = corruptor.corrupt_dataframe(df, {
-    "fruit": [ # (1)!
-        (.75, corruptor.with_cldr_keymap_file("de-t-k0-windows.xml", rng=rng,))
-    ],
-    "type": [ # (2)!
-        corruptor.with_edit(
-            p_insert=.4, 
-            p_delete=.3, 
-            p_substitute=.2, 
-            p_transpose=.1, 
-            charset=string.ascii_lowercase,
-        )
-    ],
-    "grade": [ # (3)!
+    ("fruit", "type"): (.5, with_permute()),  # (1)!
+    "grade": [  # (2)!
         corruptor.with_missing_value(strategy="all"),
         corruptor.with_substitute(charset=string.ascii_uppercase, rng=rng),
+    ],
+    "amount": [  # (3)!
+        (.8, corruptor.with_insert(charset=string.digits, rng=rng, )),
+        (.2, corruptor.with_delete(rng=rng, ))
     ]
-})
+}, rng=rng)
 
 print(df_corrupt)
 # => [["fruit", "type", "weight_in_grams", "amount", "grade"],
-#       ["apole", "lstar", "241.0", "3", ""],
-#       ["bananq", "cavendiash", "195.6", "5", ""],
-#       ["oeange", "mandarni", "71.1", "6", "M"]]
+#       ["apple", "elstar", "241.0", "83", ""],
+#       ["cavendish", "banana", "195.6", "", "O"],
+#       ["mandarin", "orange", "71.1", "", "F"]]
 ```
 
-1. You can assign probabilities to corruptors for a column. In this case, the keymap corruptor will apply to 75% of all records. The remaining 25% remain untouched.
-2. You can assign a single corruptor to a column. In this case, the edit corruptor will apply to all records.
-3. You can assign multiple corruptors to a column. In this case, the missing value and substitute corruptors will apply to 50% of records each.
+1. You can assign probabilities to a corruptor for a column. In this case, the permutation corruptor will be applied to 50% of all records. The remaining 50% remain untouched.
+2. You can assign multiple corruptors to a column. In this case, the two corruptors will be evenly applied to 50% of all records.
+3. You can assign probabilities to multiple corruptors for a column. In this case, the insertion and deletion corruptor are applied to 80% and 20% of all records respectively.
