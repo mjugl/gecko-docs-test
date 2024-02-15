@@ -203,14 +203,11 @@ def generate_data_frame(count, rng):
         rng=rng,
     )
 
-    return generator.to_dataframe(  # (1)!
-        [
-            (gen_given_name_gender, ["given_name", "gender"]),  # (2)!
-            (gen_last_name, "last_name"),  # (3)!
-            (gen_street_municip_postcode, ["street_name", "municipality", "postcode"]),
-        ],
-        count
-    )
+    return generator.to_dataframe({
+        ("given_name", "gender"): gen_given_name_gender,
+        "last_name": gen_last_name,
+        ("street_name", "municipality", "postcode"): gen_street_municip_postcode,
+    }, count)
 ```
 
 1. The `to_dataframe` function takes two arguments: a list of generators and column names, and the number of records to generate.
@@ -614,7 +611,7 @@ def generate_data_frame(count, rng):
     
     gen_date_of_birth = create_date_of_birth_generator(rng=rng)  # (1)!
 
-    returngenerator.to_dataframe({
+    return generator.to_dataframe({
         ("given_name", "gender"): gen_given_name_gender,
         "last_name": gen_last_name,
         ("street_name", "municipality", "postcode"): gen_street_municip_postcode,
