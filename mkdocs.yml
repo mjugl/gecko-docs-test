@@ -49,6 +49,7 @@ nav:
   - Corrupting data: data-corruption.md
   - Examples with Gecko:
     - German population dataset: examples/german.md
+  - Release notes: release-notes.md
 
 extra:
   social:
