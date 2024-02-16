@@ -49,7 +49,7 @@ import numpy as np
 from gecko import generator
 
 rng = np.random.default_rng(112358)
-fruit_generator = generator.with_frequency_table(
+fruit_generator = generator.from_frequency_table(
     "fruit.csv",
     header=True,
     value_column="fruit",
