@@ -49,7 +49,7 @@ def my_generator(count: int) -> pd.Series:
     pass
 ```
 
-A corruptor is any function that takes in a series and returns a modified copy of it.
+A corruptor is any function that takes in a list of series and returns a modified copy of it.
 Similar to generators, they are expressed with a simple type alias.
 
 ```python
@@ -57,10 +57,10 @@ from typing import Callable
 import pandas as pd
 
 # Corruptor type definition.
-Corruptor = Callable[[pd.Series], pd.Series]
+Corruptor = Callable[[list[pd.Series]], list[pd.Series]]
 
 # This is what a valid corruptor looks like.
-def my_corruptor(srs_in: pd.Series) -> pd.Series:
+def my_corruptor(srs_lst: list[pd.Series]) -> list[pd.Series]:
     pass
 ```
 
