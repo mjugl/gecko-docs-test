@@ -237,11 +237,12 @@ def corrupt_data_frame(df, rng):
                 rng=rng,
             ))
         ]
-    })
+    }, rng=rng)  # (3)!
 ```
 
 1. The `corrupt_dataframe` function takes in two arguments: the data frame to corrupt and a dictionary. This dictionary maps column names to a list of corruptors to apply to this column.
 2. Each column is assigned a list. This list contains entries that define how corruptors should be applied. The syntax for each entry is `(probability, corruptor)`. So in this case, the replacement table corruptor is applied to 10% of all values in the `given_name` column. The remaining 90% remain untouched.
+3. It is important to supply the RNG to `corrupt_dataframe` so that it always selectes the same records for corruption every time the script is run.
 
 For columns such as `gender`, the available options are limited.
 In this example, it can only take on the values `m` and `f`.
@@ -270,7 +271,7 @@ def corrupt_data_frame(df, rng):
                 rng=rng,
             ))
         ]
-    })
+    }, rng=rng)
 ```
 
 1. The `with_categorical_values` function allows you to reuse the same files that you used to generate your data. The function call is similar to the frequency table functions in the `generator` module.
@@ -302,7 +303,7 @@ def corrupt_data_frame(df, rng):
                 strategy="all",  # (2)!
             ))
         ]
-    })
+    }, rng=rng)
 ```
 
 1. By default, this corruptor uses an empty string as the "missing value". You don't need to add this parameter if you are happy with empty strings, but it's good practice nonetheless to be as explicit as possible in case the default value changes in the future.
@@ -344,7 +345,7 @@ def corrupt_data_frame(df, rng):
                 rng=rng,
             ))
         ]
-    })
+    }, rng=rng)
 ```
 
 1. The `with_cldr_keymap_file` function can read any CLDR keymap. [Beware of limitations however](../data-corruption.md#keyboard-typos) since CLDR keymaps are currently undergoing a large revision.
@@ -428,7 +429,7 @@ def corrupt_data_frame(df, rng):
                 rng=rng,
             ))
         ]
-    })
+    }, rng=rng)
 
 
 if __name__ == "__main__":
