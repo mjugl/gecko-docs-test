@@ -10,7 +10,7 @@ def corruptor_func(srs_lst: list[pd.Series]) -> list[pd.Series]:
     assert len(srs_lst) == 1  # check amount of columns
     srs_out = srs_lst[0].copy()
     # ... perform mutations on the copy ...
-    return srs_out
+    return [srs_out]
 ```
 
 Gecko provides functions for introducing typographic, phonetic and other errors.
